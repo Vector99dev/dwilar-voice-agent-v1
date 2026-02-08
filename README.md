@@ -1,239 +1,256 @@
-# LiveKit Voice Real Estate Agent Backend
+# 🧭 Dwilar Voice Real Estate Agent [Project ID: P-12334]
 
-## Overview
+An AI-powered voice agent that helps users find their perfect property through natural conversation, leveraging LiveKit for real-time communication, OpenAI for intelligence, and Pinecone for semantic property search — with bilingual support for English and Japanese.
 
-This backend powers an AI-driven voice real estate agent using LiveKit for real-time communication, OpenAI for natural language processing, and Pinecone for vector-based property search. The agent can communicate in both English and Japanese and provides intelligent property recommendations based on user preferences.
+---
 
-## Features
+## 📚 Table of Contents
 
-- **Multi-language Support**: English and Japanese voice interaction
-- **Real-time Voice Communication**: Using LiveKit infrastructure
-- **Intelligent Property Search**: Vector-based semantic search using Pinecone
-- **Contact Information Collection**: Automated lead capture with form integration
-- **Natural Language Processing**: OpenAI GPT-4 for conversation management
-- **Text-to-Speech**: Google Cloud TTS with language-specific voices
+- [About](#-about)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Installation](#%EF%B8%8F-installation)
+- [Usage](#-usage)
+- [Configuration](#-configuration)
+- [Screenshots](#-screenshots)
+- [API Documentation](#-api-documentation)
+- [Contact](#-contact)
+- [Acknowledgements](#-acknowledgements)
 
-## Architecture
+---
 
-### Core Components
+## 🧩 About
 
-1. **Agent (`agent.py`)**: Main AI assistant implementation
-2. **Vector Database (`vectordb.py`)**: Property data indexing and management
-3. **Vector Search (`vectorsearch.py`)**: Property search functionality
-4. **Prompt System (`prompt.py`)**: System prompts and conversation flow
-5. **Alternative Agent (`agent1.py`)**: Simplified agent implementation
+Finding the right property can be overwhelming — browsing countless listings, filtering by location, price, and size, and still not being sure. This project solves that by providing an **AI voice agent** that acts as a personal real estate assistant from Dwilar Company.
 
-### Key Technologies
+Users simply **speak** their preferences (desired location, budget, number of bedrooms), and the agent performs a **semantic vector search** across a curated property database to recommend the top matches. It handles the full conversation flow — from greeting and consent collection, through property presentation and selection, all the way to capturing contact information for follow-up viewings.
 
-- **LiveKit**: Real-time audio communication and room management
-- **OpenAI**: GPT-4 for conversation AI and embeddings for search
-- **Pinecone**: Vector database for semantic property search
-- **Google Cloud**: Text-to-speech services
-- **Deepgram**: Speech-to-text transcription
+Key goals:
+- Deliver a hands-free, conversational property discovery experience
+- Support bilingual interaction (English & Japanese)
+- Enable seamless frontend integration via LiveKit RPC for UI updates (property cards, contact forms)
 
-## Setup Instructions
+---
+
+## ✨ Features
+
+- **Real-time Voice Conversation** – Bidirectional audio powered by LiveKit with noise cancellation and voice activity detection
+- **Bilingual Support (EN/JA)** – Automatic language switching with locale-specific TTS voices
+- **Semantic Property Search** – Vector-based search via Pinecone using OpenAI embeddings to find the best-matching listings
+- **Guided Conversation Flow** – Structured agent dialogue: greeting → consent → requirements → search → details → contact capture → goodbye
+- **Frontend RPC Integration** – Pushes property results, contact forms, and UI state to the client via LiveKit RPC methods
+- **Automated Lead Capture** – Collects email and phone through voice or frontend form and submits for follow-up
+- **Configurable AI Personality** – Customizable system prompt controls tone, language, and conversation rules
+
+---
+
+## 🧠 Tech Stack
+
+| Category    | Technologies                                                    |
+| ----------- | --------------------------------------------------------------- |
+| **Language**    | Python 3.8+                                                 |
+| **Voice/RTC**   | LiveKit Agents SDK, LiveKit RTC                             |
+| **AI / LLM**    | OpenAI GPT-4o-mini, OpenAI Embeddings (`text-embedding-3-small`) |
+| **Vector DB**   | Pinecone (Serverless, cosine similarity)                    |
+| **STT**         | Deepgram Nova-2 (multi-language)                            |
+| **TTS**         | Google Cloud Text-to-Speech, AWS Polly (Japanese fallback), Deepgram TTS, ElevenLabs |
+| **VAD**         | Silero Voice Activity Detection                             |
+| **Utilities**   | python-dotenv, tqdm, asyncio                                |
+
+---
+
+## ⚙️ Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/dwilar-voice-agent-v1.git
+
+# Navigate to the project directory
+cd dwilar-voice-agent-v1
+
+# (Recommended) Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
 
 ### Prerequisites
 
 - Python 3.8+
-- OpenAI API key
-- Pinecone API key
-- LiveKit Cloud account
-- Google Cloud account (for TTS)
+- An [OpenAI](https://platform.openai.com/) API key
+- A [Pinecone](https://www.pinecone.io/) API key and environment
+- A [LiveKit Cloud](https://livekit.io/) account (URL, API key, API secret)
+- A [Deepgram](https://deepgram.com/) API key
+- A [Google Cloud](https://cloud.google.com/) service account JSON for TTS
 
-### Environment Variables
+---
 
-Create a `.env` file in the backend directory with the following variables:
+## 🚀 Usage
 
-```env
-OPENAI_API_KEY=your_openai_api_key
-PINECONE_API_KEY=your_pinecone_api_key
-PINECONE_ENV=your_pinecone_environment
-PINECONE_INDEX_NAME=your_index_name
-LIVEKIT_API_KEY=your_livekit_api_key
-LIVEKIT_API_SECRET=your_livekit_api_secret
-LIVEKIT_URL=wss://your-livekit-url
-```
+### 1. Index property data into Pinecone
 
-### Installation
-
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-2. Initialize Pinecone index and upload property data:
 ```bash
 python vectordb.py
 ```
 
-3. Run the agent:
+This reads `data.json`, generates embeddings for each property listing, and upserts them into your Pinecone index.
+
+### 2. Start the voice agent
+
 ```bash
 python agent.py
 ```
 
-## Usage
+The agent connects to your LiveKit room and waits for participants.
 
-### Agent Functionality
+### 3. (Optional) Test vector search standalone
 
-The AI agent follows this conversation flow:
+```bash
+python vectorsearch.py
+```
 
-1. **Initial Greeting**: Introduces itself as a Dwilar Company real estate agent
-2. **Consent Collection**: Asks for user permission to collect information
-3. **Property Requirements**: Collects location, price range, and bedroom count
-4. **Property Search**: Performs vector search and presents top 3 matches
-5. **Property Details**: Provides detailed information on selected properties
-6. **Contact Collection**: Captures email and phone for interested users
-7. **Follow-up**: Promises contact for property viewings
+Enter location, price, and bedroom count interactively to preview search results.
 
-### Function Tools
+### Conversation Flow
 
-The agent includes several function tools:
+1. **Greeting** – Agent introduces itself as a Dwilar Company real estate agent
+2. **Consent** – Asks user permission to collect information
+3. **Requirements** – Collects desired location, price range (USD), and number of bedrooms one at a time
+4. **Search** – Calls `search_real_estate()` to find the top 3 matching properties via Pinecone
+5. **Presentation** – Describes each property in a concise, natural way
+6. **Selection** – Lets the user pick a property or search again
+7. **Details** – Provides more information on the chosen property
+8. **Contact Capture** – Shows a contact form and collects email & phone number
+9. **Goodbye** – Politely closes the conversation with a follow-up promise
 
-- `search_real_estate()`: Vector-based property search
-- `show_contact_form()`: Display contact information form
-- `submit_contact_info()`: Process collected contact details
-- `get_language()`: Check current language setting
-- `initial_greeting()`: Provide introduction message
+---
 
-### Language Support
+## 🧾 Configuration
 
-The agent automatically detects and switches between:
-- **English**: Using male Chirp-HD voice
-- **Japanese**: Using female Chirp3-HD voice
+### Environment Variables
 
-Language switching is handled through participant attributes in the LiveKit room.
+Create a `.env` file in the project root (see `.env.example`):
 
-## Vector Search System
+```env
+DEEPGRAM_API_KEY=your-deepgram-key
 
-### Data Structure
+OPENAI_API_KEY=your-openai-api-key
 
-Properties are stored in Pinecone with embeddings generated from:
-- Property title
-- Location/address
-- Price information
-- Number of bedrooms
-- Property structure/type
+LIVEKIT_URL=wss://your-livekit-url
+LIVEKIT_API_KEY=your-livekit-api-key
+LIVEKIT_API_SECRET=your-livekit-api-secret
 
-### Search Algorithm
+PINECONE_API_KEY=your-pinecone-api-key
+PINECONE_ENV=your-pinecone-env
+PINECONE_INDEX_NAME=your-pinecone-index-name
 
-1. User input is converted to natural language query
-2. Query is embedded using OpenAI's `text-embedding-3-small` model
-3. Pinecone performs cosine similarity search
-4. Top 3 most relevant properties are returned
+GOOGLE_APPLICATION_CREDENTIALS=./google-application-credentials.json
+```
 
-### Sample Property Data
+### Audio Pipeline Settings
+
+| Component            | Setting                          |
+| -------------------- | -------------------------------- |
+| **STT**              | Deepgram Nova-2, multi-language  |
+| **TTS (English)**    | Deepgram `aura-asteria-en`       |
+| **TTS (Japanese)**   | AWS Polly `Mizuki` (standard)    |
+| **VAD**              | Silero, activation threshold 0.7 |
+| **Noise Cancellation** | LiveKit BVC                    |
+| **LLM**              | GPT-4o-mini, temperature 0.3    |
+
+### Project Structure
+
+```
+dwilar-voice-agent-v1/
+├── agent.py            # Main AI voice agent (full-featured with RPC & contact forms)
+├── agent1.py           # Simplified/alternative agent implementation
+├── vectordb.py         # Pinecone index creation & property data upsert
+├── vectorsearch.py     # Standalone vector search testing utility
+├── prompt.py           # System prompt defining agent personality & conversation rules
+├── data.json           # Property listings dataset (JSON)
+├── requirements.txt    # Python dependencies
+├── .env.example        # Environment variable template
+└── .gitignore          # Git ignore rules
+```
+
+---
+
+## 🖼 Screenshots
+
+> _Screenshots and demo GIFs of the voice agent in action will be added here._
+
+<!-- Example:
+![Voice Agent Demo](docs/demo.gif)
+-->
+
+---
+
+## 📜 API Documentation
+
+### LiveKit RPC Methods
+
+The agent exposes the following RPC methods for frontend communication:
+
+| Method              | Direction       | Description                                      |
+| ------------------- | --------------- | ------------------------------------------------ |
+| `initData`          | Agent → Client  | Sends top property search results to the frontend |
+| `showContactForm`   | Agent → Client  | Triggers the contact form UI on the client        |
+| `submitContactInfo` | Agent → Client  | Sends collected contact details and hides form    |
+| `getContactInfo`    | Agent → Client  | Retrieves stored contact information              |
+
+### Agent Function Tools
+
+| Tool                       | Parameters                          | Description                                    |
+| -------------------------- | ----------------------------------- | ---------------------------------------------- |
+| `search_real_estate()`     | `location`, `price`, `bedrooms`     | Semantic vector search for matching properties  |
+| `show_contact_form()`      | —                                   | Display contact collection form via RPC         |
+| `submit_contact_info()`    | `email`, `phone`                    | Submit captured lead contact information        |
+| `get_language()`           | —                                   | Returns current language code (`en` / `ja`)     |
+| `initial_greeting()`       | —                                   | Returns the agent's introduction message        |
+
+### Property Data Schema
 
 ```json
 {
   "title": "Modern 3BR House",
+  "imgs": ["https://..."],
+  "videos": [],
+  "floor_plan": ["https://..."],
   "property_detail": {
+    "PROPERTY ID": "ABC123",
     "PRICE": "$450,000",
     "BEDROOMS": "3",
-    "PROPERTY TYPE": "House"
+    "PROPERTY TYPE": "Single Family Homes",
+    "TOTAL SQFT": "2,500",
+    "STATUS": "Available"
   },
   "description_detail": {
-    "Address": "123 Main St, Tokyo, Japan"
+    "Address": "Tokyo, Japan",
+    "Structure": "Wooden, 2-story",
+    "Year built": "2020"
   }
 }
 ```
 
-## API Integration
+---
 
-### LiveKit RPC Methods
+## 📬 Contact
 
-The agent registers several RPC methods for frontend communication:
+- **Author:** Dwilar Company
+- **GitHub:** [Vector99dev](https://github.com/yourgithub)
+- **Email:** challengemode45@gmail.com
+- **Website:** [Not deployed](https://dwilar.com)
 
-- `initData`: Send property search results to frontend
-- `showContactForm`: Display contact collection form
-- `submitContactInfo`: Process contact form submission
-- `getContactInfo`: Retrieve stored contact information
+---
 
-### Real-time Communication
+## 🌟 Acknowledgements
 
-The agent uses LiveKit's real-time infrastructure for:
-- Audio streaming (bidirectional)
-- Room management
-- Participant attribute synchronization
-- RPC method calls for UI updates
-
-## Configuration
-
-### Audio Settings
-
-- **STT**: Deepgram Nova-2 model with language detection
-- **TTS**: Google Cloud TTS with voice variants per language
-- **VAD**: Silero Voice Activity Detection (threshold: 0.7)
-- **Noise Cancellation**: BVC (Background Voice Cancellation)
-
-### LLM Configuration
-
-- **Model**: GPT-4o-mini
-- **Temperature**: 0.3 (balanced creativity/consistency)
-- **Context**: Language-specific system prompts
-
-## File Structure
-
-```
-backend/
-├── agent.py              # Main AI agent implementation
-├── agent1.py             # Alternative/simplified agent
-├── vectordb.py           # Vector database management
-├── vectorsearch.py       # Search functionality
-├── prompt.py             # System prompts and instructions
-├── requirements.txt      # Python dependencies
-├── config/               # Configuration files
-│   └── *.json           # Service account keys
-└── KMS/                  # Key Management System
-    └── logs/            # Application logs
-```
-
-## Dependencies
-
-Key Python packages:
-
-- `livekit-agents`: Real-time communication framework
-- `openai`: AI language model and embeddings
-- `pinecone-client`: Vector database client
-- `google-cloud-texttospeech`: Text-to-speech services
-- `python-dotenv`: Environment variable management
-
-See `requirements.txt` for complete dependency list.
-
-## Monitoring and Logging
-
-The agent includes comprehensive logging for:
-- User interactions and conversation flow
-- Property search queries and results
-- Contact information collection
-- Language switching events
-- RPC method calls and responses
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Connection Failures**: Check LiveKit credentials and network connectivity
-2. **Search Not Working**: Verify Pinecone index exists and has data
-3. **Language Not Switching**: Ensure participant attributes are set correctly
-4. **TTS Issues**: Confirm Google Cloud credentials are properly configured
-
-### Debugging
-
-Enable debug logging by setting:
-```python
-logging.basicConfig(level=logging.DEBUG)
-```
-
-## Contributing
-
-When modifying the agent:
-
-1. Update system prompts in `prompt.py` for behavior changes
-2. Modify vector search logic in `vectorsearch.py` for search improvements
-3. Add new function tools to the `Assistant` class for additional features
-4. Update environment variables documentation for new integrations
-
-## License
-
-This project is part of the Dwilar Company real estate platform. 
+- [LiveKit](https://livekit.io/) — Real-time communication infrastructure
+- [OpenAI](https://openai.com/) — GPT-4o-mini LLM and text embeddings
+- [Pinecone](https://www.pinecone.io/) — Serverless vector database
+- [Deepgram](https://deepgram.com/) — Speech-to-text and text-to-speech
+- [Google Cloud](https://cloud.google.com/) — Text-to-speech services
+- [Silero](https://github.com/snakers4/silero-vad) — Voice Activity Detection model
+- [ElevenLabs](https://elevenlabs.io/) — High-quality voice synthesis
